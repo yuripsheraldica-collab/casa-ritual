@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
@@ -28,21 +28,23 @@ const ingredients = [
   },
 ];
 
-const fadeUp = {
+const easePremium = [0.16, 1, 0.3, 1] as const;
+
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 28 },
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: 0.06 * i, duration: 0.85, ease: [0.16, 1, 0.3, 1] },
+    transition: { delay: 0.06 * i, duration: 0.85, ease: easePremium },
   }),
 };
 
-const storyImage = {
+const storyImage: Variants = {
   hidden: { opacity: 0, scale: 1.05 },
   show: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 1.15, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 1.15, ease: easePremium },
   },
 };
 
@@ -53,26 +55,28 @@ export function Sections() {
     const root = ingredientRoot.current;
     if (!root) return;
 
-    const cards = gsap.utils.toArray<HTMLElement>(root.querySelectorAll("[data-ingredient]"));
-    gsap.set(cards, { opacity: 0, y: 36, filter: "blur(6px)" });
+    const ctx = gsap.context(() => {
+      const cards = gsap.utils.toArray<HTMLElement>(
+        root.querySelectorAll("[data-ingredient]"),
+      );
+      gsap.set(cards, { opacity: 0, y: 36, filter: "blur(6px)" });
 
-    const triggers = ScrollTrigger.batch(cards, {
-      start: "top 82%",
-      onEnter: (elements) => {
-        gsap.to(elements, {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 1.05,
-          stagger: 0.12,
-          ease: "power3.out",
-        });
-      },
-    }) as ScrollTrigger[];
+      ScrollTrigger.batch(cards, {
+        start: "top 82%",
+        onEnter: (elements) => {
+          gsap.to(elements, {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 1.05,
+            stagger: 0.12,
+            ease: "power3.out",
+          });
+        },
+      });
+    }, root);
 
-    return () => {
-      triggers.forEach((t) => t.kill());
-    };
+    return () => ctx.revert();
   }, []);
 
   return (
