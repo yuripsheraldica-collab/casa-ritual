@@ -8,13 +8,14 @@ import {
   useContext,
   useLayoutEffect,
   useRef,
+  type MutableRefObject,
 } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
 type ScrollContextValue = {
-  scrollRef: React.MutableRefObject<number>;
-  limitRef: React.MutableRefObject<number>;
+  scrollRef: MutableRefObject<number>;
+  limitRef: MutableRefObject<number>;
 };
 
 const ScrollContext = createContext<ScrollContextValue | null>(null);
@@ -40,9 +41,9 @@ export function ScrollProvider({ children }: { children: React.ReactNode }) {
       wheelMultiplier: 0.85,
     });
 
-    lenis.on("scroll", ({ scroll, limit }) => {
-      scrollRef.current = scroll;
-      limitRef.current = limit;
+    lenis.on("scroll", (instance) => {
+      scrollRef.current = instance.scroll;
+      limitRef.current = instance.limit;
       ScrollTrigger.update();
     });
 
