@@ -1,9 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
-import * as THREE from "three";
-
+import { useMemo } from "react";
 const vertexShader = /* glsl */ `
 varying vec2 vUv;
 void main() {
@@ -54,7 +52,6 @@ void main() {
 `;
 
 function LiquidPlane() {
-  const ref = useRef<THREE.ShaderMaterial>(null);
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
@@ -63,16 +60,13 @@ function LiquidPlane() {
   );
 
   useFrame(({ clock }) => {
-    if (ref.current) {
-      ref.current.uniforms.uTime.value = clock.getElapsedTime();
-    }
+    uniforms.uTime.value = clock.getElapsedTime();
   });
 
   return (
     <mesh scale={[2.35, 1.32, 1]}>
       <planeGeometry args={[1, 1, 1, 1]} />
       <shaderMaterial
-        ref={ref}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
         uniforms={uniforms}
